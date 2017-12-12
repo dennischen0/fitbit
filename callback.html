@@ -1,0 +1,52 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+
+  var search = location.search.substring(1);
+  var json = search?JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}',
+                   function(key, value) { return key===""?value:decodeURIComponent(value) }):{}
+
+  console.log(json.code);
+
+  var settings = {
+    "async": true,
+    "crossDomain": true,
+    "url": "https://api.fitbit.com/oauth2/token",
+    "method": "POST",
+    "headers": {
+      "Authorization": "Basic MjJDR0hLOjYyMGI3OWI4NDMwZDRjNjk3MDc2NmYyOWNmMjc4NDAz",
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    "data": {
+      "client_id": "22CGHK",
+      "grant_type": "authorization_code",
+      "redirect_uri": "http://localhost:8000/callback.html",
+      "code": json.code
+    }
+  }
+
+  $.ajax(settings).done(function (response) {
+    console.log(response)
+    getProfile(response.user_id, response.access_token);
+  });
+
+
+
+});
+
+function getProfile(user_id, access_token) {
+  var settings = {
+    "async": true,
+    "crossDomain": true,
+    "url": "https://api.fitbit.com/1/user/" + user_id + "/profile.json",
+    "method": "GET",
+    "headers": {
+      "Authorization": "Bearer " + access_token
+    }
+  }
+
+  $.ajax(settings).done(function (response) {
+    console.log(response);
+  });
+}
+</script>
