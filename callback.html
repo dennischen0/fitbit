@@ -47,6 +47,8 @@ function getProfile(user_id, access_token) {
 
   $.ajax(settings).done(function (response) {
     console.log(response);
+    $("#name").html(response.fullName)
   });
 }
 </script>
+<div id="name">Name</div>
