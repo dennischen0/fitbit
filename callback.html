@@ -1,11 +1,12 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
+var user_id;
+var access_token;
 $(document).ready(function() {
 
   var search = location.search.substring(1);
   var json = search?JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}',
                    function(key, value) { return key===""?value:decodeURIComponent(value) }):{}
-
   console.log(json.code);
 
   var settings = {
@@ -26,16 +27,17 @@ $(document).ready(function() {
   }
 
   $.ajax(settings).done(function (response) {
+    user_id = response.user_id;
+    access_token = response.access_token;
     console.log(response)
-    getProfile(response.user_id, response.access_token);
-    getActivity(response.user_id, response.access_token);
+    getProfile();
   });
 
 
 
 });
 
-function getProfile(user_id, access_token) {
+function getProfile() {
   var settings = {
     "async": true,
     "crossDomain": true,
@@ -52,11 +54,11 @@ function getProfile(user_id, access_token) {
   });
 }
 
-function getActivity(user_id, access_token) {
+function getActivity() {
   var settings = {
     "async": true,
     "crossDomain": true,
-    "url": "https://api.fitbit.com/1/user/" + user_id + "/activities/date/2017-11-11.json",
+    "url": "https://api.fitbit.com/1/user/" + user_id + "/activities/steps/date/2018-01-01/today.json",
     "method": "GET",
     "headers": {
       "Authorization": "Bearer " + access_token
@@ -64,10 +66,63 @@ function getActivity(user_id, access_token) {
   }
 
   $.ajax(settings).done(function (response) {
-    console.log(response);
-    $("#name").html(response)
+    console.log(response)
+
+    var step_array = response["activities-steps"];
+
+    for (var i = 0; i < step_array.length; i++) {
+      var step = step_array[i]
+      if (step.value == 0) {
+        buildAjaxCalls(step.dateTime);
+      }
+    }
+    console.log(settingsArray);
+    addSteps();
+
+
   });
 }
+
+var settingsArray = [];
+
+function buildAjaxCalls(date) {
+      var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": "https://api.fitbit.com/1/user/" + user_id + "/activities.json",
+        "method": "POST",
+        "data": {
+                "activityId":17190,
+                "startTime":"10:00:00",
+                "durationMillis":3600000,
+                "date":date,
+                "distance":getRandomInt(14000, 16000),
+                "distanceUnit":"steps"
+        },
+        "headers": {
+          "Authorization": "Bearer " + access_token
+        }
+      }
+      settingsArray.push(settings);
+}
+
+function addSteps(){
+
+  if(settingsArray.length > 0) {
+    $.ajax(settingsArray[0]).done(function (response) {
+      settingsArray.shift();
+      addSteps();
+      console.log(response)
+    });
+  }
+
+
+}
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
 </script>
 <div id="name"></div>
-<button id="button">Add</button>
+<button id="button" onclick="getActivity()">Add</button>
