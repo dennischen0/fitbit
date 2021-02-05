@@ -1,7 +1,7 @@
 const express = require('express')
-const app = express()
-const port = 5000
+const path = require('path')
+const PORT = process.env.PORT || 5000
 
-app
+express()
   .use(express.static(path.join(__dirname, 'public')))
   .listen(PORT, () => console.log(`Listening on ${ PORT }`))
