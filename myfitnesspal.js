@@ -1,3 +1,8 @@
+var jqry = document.createElement('script');
+jqry.src = "https://code.jquery.com/jquery-3.3.1.min.js";
+document.getElementsByTagName('head')[0].appendChild(jqry);
+jQuery.noConflict();
+
 
 $(document).ready(function() {
   const month = 1;
